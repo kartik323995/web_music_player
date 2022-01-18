@@ -1,0 +1,670 @@
+{% load crispy_forms_tags%}
+<style>
+    body{
+        margin: 0px;
+        font-family: Arial, Helvetica, sans-serif;
+    } 
+    .top{
+        position: fixed;
+        width: 100%;
+        height: 75px;
+        background-color: #333;
+        color: #f2f2f2;
+        text-decoration: none;
+        font-size: 40px;
+    }
+    .top_heading{
+        display: block;
+        float: left;
+        padding: 14px 0px 0px 620px;
+        font-size: 40px;
+    }
+    .Add_new{
+        float: right;
+        padding: 0px 20px 0px 0px;
+        font-size: 70px;
+        color: #f2f2f2;
+        display: block;
+        text-decoration: none;
+    }
+    .category {
+        background-color: #eee;
+        color: #444;
+        cursor: pointer;
+        padding: 18px;
+        text-align: left;
+        border: none;
+        outline: none;
+        transition: 0.4s;
+        text-decoration: none;
+        display: block;
+    }
+    .category:hover {
+        background-color: #ccc; 
+    }
+    .cat{
+        height: 100%;
+        width: 150px;
+        margin-top: 75px;
+        background-color: #eee;
+        position: fixed;
+    }
+    .yplayer{
+        position: fixed;
+        height: 100%;
+        width: 100%;
+        margin-left: 35%;
+        margin-top: 75px;
+        background-color: rgb(233, 233, 233);
+    }
+    .list{
+        margin-left: 150px;
+        margin-right: 65%;
+        padding-top: 75px;   
+    }
+    .musiclist{
+        width: 100%;
+        height: 70px;
+        border-style: solid;
+        border-width: 1px 0px ;
+        border-color: rgba(0,0,0,.1);
+        color: white;
+        cursor: pointer;
+    }
+    .music{
+        margin: 17px 15px 0px 30px;
+        color: rgb(27, 27, 27);   
+    }
+    .musiclisth:hover{
+        background-color: rgba(139, 139, 139, 0.1) !important;
+    }
+    .info{
+        font-size: 25px;
+        padding: 17px 15px 0px 30px;
+        color: rgb(29, 29, 29);
+    }
+    .player{
+        padding-top: 20px;
+        padding-left: 30px;
+        display: None;
+    }
+    #player_dm{
+        display: None;
+    }
+    #player_sc{
+        display: None;
+        padding-top: 20px;
+    }
+    .button{
+        padding-top: 10px;
+        padding-left: 30px;
+        float: left;
+    }
+    .switch_t{
+        padding-top: 10px;
+        padding-left: 450px;
+    }
+    .tags_div{
+        padding-top: 15px;
+        padding-left: 30px; 
+    }
+    .tags_button{
+        background-color: rgba(197, 26, 26, 0.507);
+    }
+    .tags_b{
+        margin-right: 2px;
+        border: 1px solid #2196F3;
+        background-color: white;
+        color: #2196F3;
+    }
+    .tags_b:hover, .tags_b_selected{
+        background-color: #2196F3;
+        color: white;
+    }
+    #filter{
+        margin-left: 30px; 
+        margin-top: 3px; 
+        border: 1px solid #444546;
+        background-color: #444546;
+        color: white;
+    }
+    #filter:hover{
+        background-color: #2a2a2b;
+        color: white;
+    }
+    .edit_music{
+        background-color: rgb(233, 233, 233);
+        width: 500px;
+        padding: 50px 20px 30px 100px;
+        border: 1px solid rgb(116, 116, 116);
+    }
+    #close{
+        float: right;
+        color: #6b6b6b;
+        font-size: 40px;
+        font-weight: bold;
+        margin-top: -35px;
+    }
+    #close:hover{
+        color: #000;
+        cursor: pointer;
+    }
+    #song_delete{
+        float: right;
+        font-size: 15px;
+        margin-top: -40px;
+        margin-right: 20px;
+    }
+    .category_delete{
+        display: none;
+        margin: 40px 65% 0px 200px; 
+        font-size: 15px; 
+    }
+    .modal{
+        position: fixed;
+        display: none;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        padding: 100px 200px 100px 400px;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+    .control-group{
+        padding: 3px 0px 0px 0px;
+    }
+    .submit{
+        margin: 8px 0px 0px 0px;
+    }
+</style>
+<html>
+    <head>
+        <title> Music </title>
+    </head>
+    <body >
+        <div class="top">
+            <div class = "top_heading">  Music </div>   
+            <a class="Add_new" href="{% url 'add_new' %}"> +  </a>
+        </div>
+        <div class = "cat">
+            <a class="category" id='All' href="{% url 'categories' 'All' %}"> All </a>
+            {% for var in categories %}
+                <a class="category" id={{var.Category}} href="{% url 'categories' var.Category %}"> {{var.Category}} </a>
+            {% endfor %}
+            <script>
+                document.getElementById("{{category}}").style.backgroundColor="rgb(180, 180, 180)";
+                document.getElementById("{{category}}").removeAttribute("href"); 
+                document.getElementsByClassName("cat")[0].setAttribute("url","{% url 'categories' category %}");
+            </script>
+        </div>
+        <div class = "yplayer">
+            <div id="player" class="player"></div>
+            <div id="player_dm" class="player"></div>
+            <iframe id="player_sc" class="player" width="640" height="390" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/34168172&amp;auto_play=false&amp;hide_related=false&amp;show_user=true&amp;show_reposts=false&amp;visual=true"></iframe>
+            <div class="info_main">
+                <div class="info" id="info">
+                    Name of the video playing currently
+                </div> 
+                <div class="button">
+                    <button type="button" id="button1">Youtube </button> 
+                    <button type="button" id="button2">Alternate Youtube </button>   
+                    <button type="button" id="button3">DailyMotion </button>  
+                    <button type="button" id="button4">SoundCloud  </button> 
+                </div>
+                <div class="switch_t">
+                    <a > Audio Only</a>
+                    <label class="switch">
+                        <input type="checkbox" id="switch">
+                        <span class="slider round"></span>
+                    </label>
+                    <button type="button" id="button_edit">Edit</button> 
+                </div>
+                <div class="tags_div">
+                        <a class="tags" href="#">
+                            <button class="tags_b" type="button" id="tag">tag</button>
+                        </a> 
+                </div> 
+                <button class="button_filter" type="button" id="filter">Filter</button>   
+            </div>           
+        </div>
+        <div class="modal" id="music_update">
+            <div class="edit_music">
+                <span id="close">&times;</span>
+                <form class="edit_form" name="edit_form" method="post" onsubmit="return edit_form_save()">
+                    {% csrf_token %}
+                    {{form|crispy}}
+                    <button type="submit" class="submit" id="edit_form_submit"> Update </button>
+                </form>
+                <button id="song_delete"> Delete Song</button>
+            </div>
+        </div>
+        <div class = "list">
+            {% for song in song_list %}
+                <div class="musiclist musiclisth" id="{{song.ID}}" default_id="{{song.default_id}}" data_id1="{{song.ID}}" data_id2="{{song.Alter_ID}}" data_id3="{{song.DM_ID}}" data_id4="{{song.SC_ID}}" title="{{song.Title}}"  category="{{song.Category}}" tags="">
+                    <div class="music">
+                        {{song.Title}}
+                    </div>
+                </div>
+            {% endfor %}             
+        </div>
+        <button class="category_delete" id="category_delete">Delete Category X</button>
+        <div>
+            {% for tag in tags%}
+                <a class="tag_h"  tag="{{tag}}"></a>
+            {% endfor%}
+        </div>
+        
+        
+        <script src="https://www.youtube.com/player_api"></script>
+        <script src="https://api.dmcdn.net/all.js"></script>
+        <script src="https://w.soundcloud.com/player/api.js"></script>
+        <script>
+            var sc = false;
+            var prev;
+            var current = 0;
+            var has_prev = false, one_time = true, audio_only = false, one_time_1 = true; 
+            var str_tags = ";", prev_str_tags = str_tags;          
+
+            document.getElementById("switch").onclick = toggle_click;
+            function toggle_click(){
+                if(audio_only) audio_only = false;
+                else{
+                    audio_only = true;
+                    alert("If SoundCloud ID not available, default ID will play.");
+                    b4_click(); 
+                }
+            }
+
+            if(document.getElementsByClassName("musiclist").length == 0){
+                document.getElementsByClassName("info_main")[0].style.display = "none";
+                if("{{category}}" != "All"){
+                    document.getElementById("category_delete").style.display = "block";
+                }    
+            }
+
+            document.getElementById("category_delete").onclick = category_delete;
+            function category_delete(){
+                if(!confirm("Are you Sure?")) return;
+                var data ="Category="+"{{category}}";
+                var request = new XMLHttpRequest();
+
+                request.onload = function(){
+                    if(this.responseText == "success"){
+                        window.location = "{% url 'home' %}";
+                    }
+                    else{
+                        alert("Error in deleting");
+                    }
+                }
+
+                request.open("GET", "{% url 'category_delete' %}"+"?"+data);
+                request.send();
+            }
+
+            document.getElementById("song_delete").onclick = song_delete;
+            function song_delete(){
+                var temp = confirm("Are you want to delete?");
+                if(!temp) return;
+                var id = prev.getAttribute("id"), data = "ID="+id;
+                var request = new XMLHttpRequest();
+                
+                request.onload = function(){
+                    if(this.responseText == "success"){
+                        form_close();
+                        delete_song_from_list();
+                    }
+                    else alert("Unable to delete");    
+                };
+
+                request.open("GET", "{% url 'song_delete' %}"+"?"+data);
+                request.send();
+            }
+
+            document.getElementById("button_edit").onclick = edit_music;
+            function edit_music(){
+                document.getElementById("music_update").style.display = "block";
+                form_fill();
+            }
+
+            document.getElementById("close").onclick = form_close;
+            function form_close(){
+                document.getElementById("music_update").style.display = "none";
+            }
+            
+            
+            function edit_form_save(){
+                form = document.querySelector('form[name="edit_form"]');
+                var ID = form.elements['ID'].value,
+                    Title = form.elements['Title'].value,
+                    Alter_ID = form.elements['Alter_ID'].value,
+                    DM_ID = form.elements['DM_ID'].value,
+                    SC_ID = form.elements['SC_ID'].value,
+                    default_id = form.elements['default_id'].value,
+                    Category = form.elements['Category'].value;
+                var data = "ID="+ID+"&Title="+Title+"&Alter_ID="+Alter_ID+"&DM_ID="+DM_ID+"&SC_ID="+SC_ID+"&default_id="+default_id+"&Category="+Category;
+
+                var ajax_request = new XMLHttpRequest();
+
+                ajax_request.onload = function(){
+                        var update = false;
+                        if(this.responseText == "success") {
+                            music_update(); 
+                            form_close();   
+                            update = true;  
+                        }
+                        else alert("Unable to update");
+                    };
+                
+                ajax_request.open("GET", "{% url 'update' %}"+"?"+data, true);
+                ajax_request.send();
+                return false;
+            }
+
+            function form_fill(){
+                document.edit_form.ID.value = prev.getAttribute("id");
+                document.edit_form.Title.value = prev.getAttribute("title");
+                document.edit_form.Alter_ID.value = prev.getAttribute("data_id2");
+                document.edit_form.DM_ID.value = prev.getAttribute("data_id3");
+                document.edit_form.SC_ID.value = prev.getAttribute("data_id4");
+                document.edit_form.default_id.value = prev.getAttribute("default_id");
+                document.edit_form.Category.value = prev.getAttribute("category"); 
+                document.getElementsByClassName("edit_form")[0].getElementsByTagName("input")[1].setAttribute("disabled","disabled");
+            }
+
+            function music_update(){ 
+                var old_category = prev.getAttribute("category");
+                form = document.querySelector('form[name="edit_form"]');
+                prev.setAttribute("id", form.elements['ID'].value); 
+                prev.setAttribute("title", form.elements['Title'].value);
+                prev.setAttribute("data_id2", form.elements['Alter_ID'].value); 
+                prev.setAttribute("data_id3", form.elements['DM_ID'].value);
+                prev.setAttribute("data_id4", form.elements['SC_ID'].value); 
+                prev.setAttribute("default_id", form.elements['default_id'].value); 
+                prev.setAttribute("category", form.elements['Category'].value); 
+                document.getElementById("info").textContent = form.elements['Title'].value;   
+                prev.getElementsByClassName("music")[0].textContent = form.elements['Title'].value; 
+                if("{{category}}" != "All" && form.elements['Category'].value != old_category){
+                    delete_song_from_list();
+                }
+            }
+
+            function delete_song_from_list(){
+                var temp = prev;
+                if(prev.nextElementSibling != null){
+                    prev.nextElementSibling.click();   
+                }
+                else if(prev.previousElementSibling != null){
+                    prev.previousElementSibling.click();
+                }
+                else{
+                    if("{{category}}" != "All"){
+                        document.getElementById("category_delete").style.display = "block";
+                    }
+                    if(current == 1 || current == 2){
+                        player.stopVideo();
+                        document.getElementById("player").style.display = "None";
+                    }
+                    else if(current == 3){
+                        player_dm.pause();
+                        document.getElementById("player_dm").style.display = "None";
+                    }
+                    else if(current == 4){
+                        player_sc.pause();
+                        document.getElementById("player_sc").style.display = "None";
+                    }
+                    document.getElementsByClassName("info_main")[0].style.display = "none";
+                }
+                temp.remove();
+            }
+
+
+            var music_list = document.getElementsByClassName("musiclist");
+            var tag_l = document.getElementsByClassName("tag_h");
+            for(i = 0; i <  music_list.length ; i++){
+                music_list[i].onclick = music_list_click;
+                music_list[i].setAttribute("tags",tag_l[i].getAttribute("tag")); 
+            }
+            if(tag_l.length) tag_l[0].parentNode.remove();
+            
+            document.getElementById("filter").onclick = filter_tag;
+
+            if(one_time){
+                if(music_list.length > 0){
+                    music_list[0].click();      
+                }
+                one_time = false;
+            }
+
+            function music_list_click(){
+                if(prev === this) return;
+                this.style.backgroundColor="rgba(120, 120, 120, 0.2)";
+                this.classList.remove("musiclisth");  
+                document.getElementById("info").innerText = this.getElementsByClassName("music")[0].innerText;
+                if(has_prev){
+                    prev.style.backgroundColor="white";
+                    prev.classList.add("musiclisth");                    
+                }
+                default_id = this.getAttribute("default_id");   
+                if(audio_only && this.getAttribute("data_id4").length) default_id = 4;  
+                hide(default_id);   
+                show(default_id, this); 
+                tags(this);   
+                current = default_id;   
+                prev = this;
+                has_prev = true;
+            }
+
+       
+            document.getElementById("button1").onclick = b1_click;
+            function b1_click(){
+                if(current == 1) return;
+                var id1 = prev.getAttribute("data_id1");
+                if(id1.length > 0){ 
+                    hide(1);
+                    show(1, prev);
+                    current = 1; 
+                }
+                else alert("No Id available"); 
+            }
+
+            document.getElementById("button2").onclick = b2_click;
+            function b2_click(){
+                if(current == 2) return;
+                var id2 = prev.getAttribute("data_id2");
+                if(id2.length > 0){ 
+                    hide(2);
+                    show(2, prev);
+                    current = 2; 
+                }
+                else alert("No Id available"); 
+            }
+            
+            document.getElementById("button3").onclick = b3_click;
+            function b3_click(){
+                if(current == 3) return;
+                var id3 = prev.getAttribute("data_id3");
+                if(id3.length > 0){
+                    hide(3);
+                    show(3, prev);
+                    current = 3;
+                } 
+                else alert("No Id available"); 
+            }
+
+            document.getElementById("button4").onclick = b4_click;
+            function b4_click(){
+                if(current == 4) return;
+                var id4 = prev.getAttribute("data_id4");
+                if(id4.length > 0){
+                    hide(4);
+                    show(4, prev);
+                    current = 4;
+                }
+                else alert("No Id available"); 
+            }
+
+            function hide(value){
+                if((current == 1 || current == 2) && (value != 1 && value != 2)){
+                    player.stopVideo();     
+                    document.getElementById("player").style.display = "None";
+                }
+                else if(current == 3 && value != 3){
+                    player_dm.pause();
+                    document.getElementById("player_dm").style.display = "None";
+                }
+                else if(current == 4 && value != 4){
+                    player_sc.pause();
+                    document.getElementById("player_sc").style.display = "None";
+                }
+            }
+
+            function show(value, element){
+                if(value == 1 || value == 2){
+                    if(current != 1 && current != 2)    document.getElementById("player").style.display = "block";  
+                    if(!has_prev) return;
+                    if(value == 1)  player.loadVideoById(element.getAttribute("data_id1")); 
+                    else    player.loadVideoById(element.getAttribute("data_id2")); 
+                }
+                else if(value == 3){
+                    if(current != 3)    document.getElementById("player_dm").style.display = "block";
+                    if(!has_prev) return;
+                    player_dm.load(element.getAttribute("data_id3"));  
+                }
+                else if(value == 4){
+                    if(current != 4)    document.getElementById("player_sc").style.display = "block";
+                    if(!has_prev) return; // error
+                    player_sc.load(element.getAttribute("data_id4"));
+                }
+            }
+
+            function tags(element){
+                div = document.getElementsByClassName("tags_div")[0];
+                while(div.firstChild){
+                    div.firstChild.remove(); 
+                }   
+                tags_l = element.getAttribute("tags").split(";");
+                url = document.getElementsByClassName("cat")[0].getAttribute("url");
+                for(let i = 1; i < tags_l.length-1; i++){
+                    var ele_a = document.createElement("a");
+                    ele_a.setAttribute("class","tags");
+                    ele_a.onclick = tag_click;
+                    var btn = document.createElement("button");
+                    btn.setAttribute("type","button");
+                    btn.setAttribute("class","tags_b");
+                    var text = document.createTextNode(tags_l[i]);
+                    btn.appendChild(text);
+                    if(str_tags.includes(";"+tags_l[i]+";")) {
+                        btn.classList.add("tags_b_selected");
+                        ele_a.classList.add("tags_highlight");
+                    }
+                    ele_a.appendChild(btn);
+                    div.appendChild(ele_a);
+                }
+            }
+            
+            function tag_click(){
+                var ele = this;
+                var str_class = ele.getAttribute("class"), tag = ele.firstChild.innerHTML;
+                if(str_class.includes("tags_highlight")){
+                    ele.classList.remove("tags_highlight");
+                    str_tags = str_tags.replace(";"+tag+";", ";");
+                    ele.firstChild.classList.remove("tags_b_selected");
+                }
+                else{
+                    ele.classList.add("tags_highlight");
+                    str_tags += tag+";";
+                    ele.firstChild.classList.add("tags_b_selected");
+                }
+            }
+            
+            function filter_tag(){
+                if(str_tags == prev_str_tags) return;
+                prev_str_tags = str_tags;
+                lst_tags = str_tags.split(";"); 
+                var music_list = document.getElementsByClassName("musiclist"); 
+                for(i = 0; i <  music_list.length ; i++){
+                    tags_v = music_list[i].getAttribute("tags");
+                    var hide = false;   
+                    for(j = 1; j < lst_tags.length-1; j++){
+                        if(tags_v.includes(";"+lst_tags[j]+";") == false){
+                            hide = true;
+                            break;
+                        } 
+                    }   
+                    if(hide) music_list[i].style.display = "none";
+                    else music_list[i].style.display = "block";
+                }
+            }
+
+            function next_element_click(){
+                var temp_node = prev;
+                while(temp_node.nextElementSibling.style.display == "none") temp_node = temp_node.nextElementSibling;
+                temp_node.nextElementSibling.click();
+            }
+            
+            // Youtube player 
+            var player; 
+            var id = document.getElementsByClassName("musiclist")[0].getAttribute("data_id1");
+            if(id == "") id = "xcJtL7QggTI";
+            function onYouTubePlayerAPIReady() {
+                player = new YT.Player('player', {
+                width: '640',
+                height: '390',
+                videoId: id,
+                events: {
+                    onStateChange: onPlayerStateChange,
+                    onError: onPlayerError,
+                }
+                });
+            }
+            
+            function onPlayerError(event){
+                alert('Error: '+ event.data);
+            }
+            function onPlayerStateChange(event) {        
+                if(event.data === 0) {  
+                    next_element_click();
+                }
+            } 
+            
+            // dailymotion
+            var player_dm;
+            var id_dm = document.getElementsByClassName("musiclist")[0].getAttribute("data_id3");
+            if(id_dm == "") id_dm = "x7tgad0";
+            player_dm = DM.player(document.getElementById("player_dm"),{ 
+                video: id_dm, 
+                width: "640", 
+                height: "390", 
+                params: { 
+                    autoplay: false, 
+                } 
+            }); 
+
+            player_dm.addEventListener('apiready', apiready);
+            player_dm.addEventListener('video_end', end); 
+            player_dm.addEventListener('video_start', video_start); 
+            
+            function video_start(){
+                if(current != 3) player_dm.pause();
+            }
+            function end(){
+                player_dm.pause();      
+                next_element_click();
+            }
+
+            // SoundCloud
+            var player_sc_Element = document.getElementById('player_sc')
+            var player_sc = SC.Widget(player_sc_Element);  
+            
+            player_sc.bind(SC.Widget.Events.FINISH,finish);
+            player_sc.bind(SC.Widget.Events.READY,ready);
+            
+            function ready(){
+                sc = true;
+            }
+            
+            function finish(){
+                next_element_click();
+            }  
+        </script>
+    </body>
+</html>
